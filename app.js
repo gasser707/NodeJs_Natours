@@ -1,9 +1,17 @@
 const express = require('express');
 const fs = require('fs');
 const app = express();
+const morgan = require('morgan')
 
 //express.json is a middleware is function that modify the request data, if we remove it we dont get request in right form
 app.use(express.json());
+app.use(morgan('dev'));
+
+app.use ((req, res, next)=>{
+
+  console.log('helloo 😂');
+  next()
+})
 
 // app.get('/', (req, res) => {
 //   res.json({ message: 'hello from the server', app: 'g-tours' });
@@ -80,7 +88,7 @@ const deleteTour = (req, res) => {
   }
 };
 
-const editTour = (req, res) => {
+const updateTour = (req, res) => {
   const id = +req.params.id;
   const tour = tours.find((el) => el.id === id);
 
@@ -105,8 +113,27 @@ const tours = JSON.parse(
 
 //only this callback runs in event loop, so no blocking code inside, read heavy json before
 
-app.route('/api/v1/tours').get(getAllTours).post(createTour);
-app.route('/api/v1/tours/:id').get(getTour).delete(deleteTour).patch(editTour);
+app
+.route('/api/v1/tours')
+.get(getAllTours)
+.post(createTour);
+
+app
+.route('/api/v1/tours/:id')
+.get(getTour)
+.delete(deleteTour)
+.patch(updateTour);
+
+app
+.route('/api/v1/users')
+.get(getAllUsers)
+.post(createUser);
+
+app
+.route('/api/v1/user/:id')
+.get(getUser)
+.patch(updateUser)
+.delete(deleteUser)
 
 const port = 3000;
 app.listen(port, () => {
