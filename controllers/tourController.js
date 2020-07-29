@@ -4,6 +4,32 @@ const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+//we get access to val here because we are calling from param middleware
+exports.checkID = (req, res, next,val) => {
+
+    if (val > tours.length - 1) {
+        return res.status(404).json({
+            status: 'fail',
+            message: 'invalid id'
+        });
+    }
+
+    next();
+};
+
+//middleware to check body has right fields before posting
+exports.checkBody = (req, res, next)=>{
+    if(req.body.name &&req.body.duration && req.body.difficulty){
+        return next()
+    }
+
+    return res.status(400).json({
+        status:'fail',
+        message:'not enough info provided'
+    })
+
+}
+
 exports.getAllTours = (req, res) => {
     res.status(200).json({
         status: 'success',
@@ -15,10 +41,8 @@ exports.getAllTours = (req, res) => {
 };
 
 exports.getTour = (req, res) => {
-    const id = +req.params.id;
-    const tour = tours.find((el) => el.id === id);
+    const tour = tours[req.params.id];
 
-    if (tour) {
         return res.status(200).json({
             status: 'success',
             results: 1,
@@ -26,12 +50,7 @@ exports.getTour = (req, res) => {
                 tour: tour,
             },
         });
-    } else {
-        return res.status(404).json({
-            status: 'fail',
-            message: 'invalid Id',
-        });
-    }
+   
 };
 
 exports.createTour = (req, res) => {
@@ -55,37 +74,25 @@ exports.createTour = (req, res) => {
 };
 
 exports.deleteTour = (req, res) => {
-    const id = +req.params.id;
-    const tour = tours.find((el) => el.id === id);
 
-    if (tour) {
-        res.status(204).json({
-            status: 'success',
-            data: null,
-        });
-    } else {
-        return res.status(404).json({
-            status: 'fail',
-            data: null,
-        });
-    }
+    const tour = tours[req.params.id];
+
+    res.status(204).json({
+        status: 'success',
+        data: null,
+    });
+
 };
 
 exports.updateTour = (req, res) => {
-    const id = +req.params.id;
-    const tour = tours.find((el) => el.id === id);
+    const tour = tours[req.params.id];
 
-    if (tour) {
-        res.status(200).json({
-            status: 'success',
-            data: {
-                tour: 'updated tour',
-            },
-        });
-    } else {
-        return res.status(404).json({
-            status: 'fail',
-            message: 'invalid Id',
-        });
-    }
+
+    res.status(200).json({
+        status: 'success',
+        data: {
+            tour: 'updated tour',
+        },
+    });
+
 };

@@ -3,10 +3,15 @@ const app = express();
 const morgan = require('morgan');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const { Router } = require('express');
 
-//express.json is a middleware is function that modify the request data, if we remove it we dont get request in right form
+//express.json is a middleware is function that modify the request data, if we remove it we don't get request in right form
 app.use(express.json());
-app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+
+}
+app.use(express.static(`${__dirname}/public`));
 
 //our own middleware
 app.use((req, res, next) => {
@@ -15,13 +20,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// app.get('/', (req, res) => {
-//   res.json({ message: 'hello from the server', app: 'g-tours' });
-// });
-
-// app.post('/', (req,res)=> {
-//     res.send('you can post to this end point')
-// });
 
 //only this callback runs in event loop, so no blocking code inside, read heavy right json before
 
