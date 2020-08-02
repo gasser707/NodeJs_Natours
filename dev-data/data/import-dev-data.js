@@ -25,10 +25,12 @@ const importData = async () => {
     try {
         await Tour.create(tours);
         console.log('successfully created data')
-        process.exit()
 
     } catch (err) 
     { console.log(err); }
+
+    process.exit()
+
 };
 
 const deleteData = async ()=>{
@@ -36,11 +38,13 @@ const deleteData = async ()=>{
     try{
         await Tour.deleteMany()
         console.log('successfully deleted')
-        process.exit()
     }
     catch(err){
         console.log(err)
     }
+    process.exit()
+
+
 }
 
 if(process.argv[2]==='--import'){
