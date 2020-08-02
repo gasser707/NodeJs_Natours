@@ -1,10 +1,8 @@
 // const fs = require('fs');
 const Tour = require('.//../models/tourModel');
-const APIFeatures = require('../utils/APIFeatures')
+const APIFeatures = require('../utils/APIFeatures');
 exports.getAllTours = async (req, res) => {
     try {
-        
-
         const features = new APIFeatures(Tour.find(), req.query).filter().sort().limit().paginate();
         const tours = await features.query;
 
@@ -123,3 +121,104 @@ exports.aliasTopTours = (req, res, next) => {
     next();
 };
 
+exports.getTourStats = async (req, res) => {
+    try {
+        const stats = await Tour.aggregate([
+            {
+                $match: { ratingsAverage: { $gte: 4.5 } }
+            },
+            {
+                $group: {
+                    _id: '$difficulty',
+                    numTours: { $sum: 1 },
+                    numRatings: { $sum: '$ratingsQuantity' },
+                    avgRating: { $avg: '$ratingsAverage' },
+                    avgPrice: { $avg: '$price' },
+                    minPrice: { $min: '$price' },
+                    maxPrice: { $max: '$price' },
+
+                }
+            },
+            {
+                //have to use same name avgPrice
+                $sort: {
+                    avgPrice: 1
+                }
+            }
+        ]);
+
+        return res.status(200).json({
+            status: 'success',
+            results: 1,
+            data: {
+                stats: stats,
+            },
+        });
+
+    } catch (err) {
+
+        res.status(400).json({
+            status: 'fail',
+            message: err
+        });
+    }
+
+};
+
+exports.getMonthlyPlan = async (req, res) => {
+
+    try {
+        const year = +req.params.year;
+        
+        const plan = await Tour.aggregate([
+            {
+                $unwind: '$startDates'
+            },
+            {
+                $match: {
+                    startDates: {
+                        $gte: new Date(`${year}-01-01`),
+                        $lte: new Date(`${year}-12-31`)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: { $month: '$startDates' },
+                    numTourStarts: { $sum: 1 },
+                    tours: {$push:'$name'}
+                }
+            },
+            {
+                $addFields: {month: '$_id'}
+            },
+
+            {
+                $project: {
+                    _id:0
+                }
+            },
+            {
+                $sort: {numTourStarts:-1}
+            },
+            // { cuts to 6 results only
+            //     $limit:6
+            // }
+        ]);
+
+        return res.status(200).json({
+            status: 'success',
+            results: plan.length,
+            data: {
+                plan: plan,
+            },
+        });
+
+    } catch (err) {
+        res.status(400).json({
+            status: 'fail',
+            message: err
+        });
+
+    }
+};

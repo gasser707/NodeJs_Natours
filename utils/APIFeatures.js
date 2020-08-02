@@ -6,8 +6,8 @@ class APIFeatures {
     }
 
     filter() {
-
         const queryObj = { ...this.queryString };
+
         const excludedFields = ['page', 'limit', 'sort', 'fields'];
         excludedFields.forEach(el => {
             delete queryObj[el];
@@ -51,7 +51,7 @@ class APIFeatures {
 
         const page = +this.queryString.page || 1;
 
-        const limit = +this.queryString.limit || 5;
+        const limit = +this.queryString.limit || 10;
         //lets say limit is 10 , so on page 2 i have to skip the first 10 values 
         const skip = (page - 1) * limit;
 
