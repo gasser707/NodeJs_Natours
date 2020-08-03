@@ -6,13 +6,15 @@ exports.getAllTours = async (req, res) => {
         const features = new APIFeatures(Tour.find(), req.query).filter().sort().limit().paginate();
         const tours = await features.query;
 
-        res.status(200).json({
+        return res.status(200).json({
             status: 'success',
             results: tours.length,
             data: {
                 tours: tours,
             },
         });
+
+
     }
     catch (err) {
         res.status(404).json({
@@ -28,7 +30,6 @@ exports.getTour = async (req, res) => {
         //Tour.findOne({_id: req.params.id})
         return res.status(200).json({
             status: 'success',
-            results: 1,
             data: {
                 tour: tour,
             },
@@ -149,7 +150,7 @@ exports.getTourStats = async (req, res) => {
 
         return res.status(200).json({
             status: 'success',
-            results: 1,
+            results: stats.length,
             data: {
                 stats: stats,
             },
@@ -183,6 +184,7 @@ exports.getMonthlyPlan = async (req, res) => {
                 }
             },
             {
+                //where accumulation happens
                 $group: {
                     _id: { $month: '$startDates' },
                     numTourStarts: { $sum: 1 },
@@ -206,7 +208,7 @@ exports.getMonthlyPlan = async (req, res) => {
             // }
         ]);
 
-        return res.status(200).json({
+        res.status(200).json({
             status: 'success',
             results: plan.length,
             data: {

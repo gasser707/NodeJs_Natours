@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
-    "start:prod": " SET NODE_ENV=production && nodemon server.js"
+    "start:prod": " SET NODE_ENV=production && nodemon server.js",
+    "debug": "ndb server.js"
   },
   "author": "Gasser Aly",
   "license": "ISC",
@@ -14,6 +15,8 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "mongoose": "^5.9.26",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "slugify": "^1.4.5",
+    "validator": "^13.1.1"
   }
 }
