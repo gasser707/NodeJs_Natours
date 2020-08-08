@@ -140,6 +140,8 @@ tourSchema.virtual("durationWeeks").get(function () {
 // tourSchema.pre('aggregate', function(next){
 // //this here would refer to the current aggregate object
 
+
+  // Add a `$match` to the beginning of the pipeline
 //     this.pipeline().unshift({$match : {secretTour: {$ne: true}}})
 //     console.log
 //     next()

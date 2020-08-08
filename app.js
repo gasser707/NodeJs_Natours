@@ -12,13 +12,12 @@ if (process.env.NODE_ENV === 'development') {
 
 }
 app.use(express.static(`${__dirname}/public`));
-
 //our own middleware
-app.use((req, res, next) => {
+// app.use((req, res, next) => {
 
-  console.log('helloo');
-  next();
-});
+//   console.log('helloo');
+//   next();
+// });
 
 
 //only this callback runs in event loop, so no blocking code inside, read heavy right json before
