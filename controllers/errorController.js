@@ -20,7 +20,7 @@ const sendErrorProduction = (err, res) => {
     });
     // programming error : dont leak to client
   } else {
-    console.err(err);
+    console.log(err);
     res.status(500).json({
       status: 'error',
       message: 'ooops! Something went wrong here'
@@ -46,6 +46,10 @@ const handleValidationErrorsDB = err => {
   message = `Invalid Input data: ${errors.join('. ')}`;
   return new AppError(message, 400);
 };
+
+const handleJsonWebTokenError = err =>{
+  return new AppError(' Your token has expired, please try logging in again', 401)
+}
 //error handling middleware always take 4 
 
 module.exports = (err, req, res, next) => {
@@ -68,6 +72,9 @@ module.exports = (err, req, res, next) => {
     }
     if (err.name === 'ValidationError') {
       newErr = handleValidationErrorsDB(newErr);
+    }
+    if(err.name==='JsonWebTokenError'){
+      newErr= handleJsonWebTokenError(newErr)
     }
     sendErrorProduction(newErr, res);
 
