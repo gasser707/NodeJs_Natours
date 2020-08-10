@@ -1,7 +1,7 @@
 const express = require('express');
 const tourRouter = express.Router();
 
-const {protect, restrictTo, forgotPassword, resetPassword} = require('../controllers/authController')
+const {protect, restrictTo} = require('../controllers/authController')
 const { getAllTours, getTour, deleteTour, updateTour, createTour, aliasTopTours, getTourStats,
 getMonthlyPlan} = require('../controllers/tourController');
 
@@ -12,8 +12,7 @@ tourRouter
 tourRouter.route('/tour-stats').get(getTourStats);
 tourRouter.route('/monthly-plan/:year').get(getMonthlyPlan);
 
-tourRouter.post('/forgotPassword', forgotPassword)
-tourRouter.post('/resetPassword', resetPassword)
+
 
 tourRouter
     .route('/')

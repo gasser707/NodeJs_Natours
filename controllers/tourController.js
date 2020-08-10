@@ -38,8 +38,6 @@ exports.getTour = catchAsync(async (req, res, next) => {
 
 exports.createTour = catchAsync(async (req, res, next) => {
     const newTour = await Tour.create(req.body);
-    console.log(22)
-
     res.status(201).json({
         status: 'success',
         data: {
@@ -52,7 +50,8 @@ exports.createTour = catchAsync(async (req, res, next) => {
 exports.updateTour = catchAsync(async (req, res, next) => {
 
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-        new: true
+        new: true,
+        runValidators: true
     });
     //returns the new updated document
 

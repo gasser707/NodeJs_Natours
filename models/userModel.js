@@ -27,11 +27,11 @@ const userSchema = new mongoose.Schema({
         required: [true, "Please enter a password"],
         minlength: [8, "A Password must at least be 8 characters"],
         select: false
-        //so it doesn't appear when returned
+        //so it doesn't appear when returned in get all users
     },
     confirmPassword: {
         type: String,
-        required: [true, "Please confirm your email"],
+        required: [true, "Please confirm your password"],
         validate: {
             //this only works on save, create not findOneUpdate
             validator: function (pass) {
@@ -53,9 +53,20 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'guide', 'lead-guide', 'admin'],
         default: 'user'
+    },
+    active:{
+        type:Boolean,
+        default:true,
     }
 
 });
+
+
+userSchema.pre(/find/, function(next){
+
+    this.find({active:{$ne:false}})
+    next()
+})
 
 //to encrypt passwords
 userSchema.pre('save', async function (next) {
@@ -70,6 +81,13 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
+userSchema.pre('save', function(next){
+    if(!this.isModified('password') ||this.isNew) return next();
+
+    this.passwordChangedAt= Date.now()-2000 // to make sure that the login token is crated after password was changed;
+    next()
+
+})
 
 //this is called an instance method, it's available on all documents of a schema
 //we cant compare manually because candidate password isn't hashed 
@@ -91,6 +109,7 @@ userSchema.methods.createPasswordResetToken = function () {
     const resetToken = crypto.randomBytes(32).toString('hex');
     this.passwordResetToken = crypto.createHash('sha256').update(resetToken).digest('hex');
     this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+    console.log({ resetToken }, this.passwordResetToken);
     return resetToken;
     //we send the un-encrypted to email and the encrypted stays in db to be compared later
 };

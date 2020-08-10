@@ -31,7 +31,8 @@ const tourSchema = new mongoose.Schema({
         type: Number,
         default: 4.5,
         min: [1, 'Rating must be at above or equal to 1.0'],
-        max: [5, 'Rating must be below or equal to 5.0']
+        max: [5, 'Rating must be below or equal to 5.0'],
+        set: val => Math.round(val * 10) / 10 // 4.666666, 46.6666, 47, 4.7
     },
     ratingsQuantity: {
         type: Number,
@@ -105,10 +106,10 @@ tourSchema.virtual("durationWeeks").get(function () {
 //     console.log(11234)
 //     next()
 // })
-// tourSchema.pre('save', function (next) {
-//     this.slug = slugify(this.name, { lower: true });
-//     next();
-// });
+tourSchema.pre('save', function (next) {
+    this.slug = slugify(this.name, { lower: true });
+    next();
+});
 
 // tourSchema.post('save', function (doc, next) {
 //     console.log(doc);
