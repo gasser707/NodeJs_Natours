@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
+const User = require('./userModel');
 const { default: validator } = require('validator');
 
 const tourSchema = new mongoose.Schema({
@@ -83,7 +84,38 @@ const tourSchema = new mongoose.Schema({
     secretTour: {
         type: Boolean,
         default: false
-    }
+    },
+    startLocation: {
+        //Geo-json        
+        type: {
+            type: String,
+            default: 'Point',
+            enum: ['Point']
+        },
+        coordinates: [Number],
+        address: String,
+        description: String
+    },
+    //embedded document of location
+    locations: [
+        {
+            type: {
+                type: String,
+                default: 'Point',
+                enum: 'Point',
+            },
+            coordinates: [Number],
+            address: String,
+            description: String,
+            day: Number
+        }
+    ],
+    guides: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: 'User'
+        }
+    ]
 
 
 }, {
@@ -97,6 +129,14 @@ tourSchema.virtual("durationWeeks").get(function () {
     //this here refers to the current document
 });
 
+//VIRTUAL POPULATE FOR REVIEWS, allows to keep reference without saving more data to db
+tourSchema.virtual('reviews', {
+    ref: 'Review',
+    //name of the field in the review model
+    foreignField: 'tour',
+    //name of the field in this model
+    localField: '_id'
+});
 
 // DOCUMENT MIDDLEWARE
 
@@ -106,6 +146,16 @@ tourSchema.virtual("durationWeeks").get(function () {
 //     console.log(11234)
 //     next()
 // })
+
+
+//EMBEDDING USERS
+
+// tourSchema.pre('save', async function (next) {
+//     const guidesPromise = this.guides.map(async id => await User.findById(id));
+//     this.guides = await Promise.all(guidesPromise);
+//     next();
+// });
+
 tourSchema.pre('save', function (next) {
     this.slug = slugify(this.name, { lower: true });
     next();
@@ -142,7 +192,7 @@ tourSchema.pre('save', function (next) {
 // //this here would refer to the current aggregate object
 
 
-  // Add a `$match` to the beginning of the pipeline
+// Add a `$match` to the beginning of the pipeline
 //     this.pipeline().unshift({$match : {secretTour: {$ne: true}}})
 //     console.log
 //     next()

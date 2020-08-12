@@ -175,7 +175,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 });
 
 exports.signup = catchAsync(async (req, res, next) => {
-    //we do that to enforce only the data we want
+    //we do that to enforce only the data we want from request, thats why we didn't use req.body
     const newUser = await User.create({
         name: req.body.name,
         email: req.body.email,
