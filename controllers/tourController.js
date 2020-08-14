@@ -1,92 +1,17 @@
 const catchAsync = require('../utils/catchAsync');
 const Tour = require('.//../models/tourModel');
-const APIFeatures = require('../utils/APIFeatures');
+const factory = require('./handlerFactory');
 const AppError = require('../utils/AppError');
 
-exports.getAllTours = catchAsync(async (req, res, next) => {
+exports.getAllTours = factory.getAll(Tour);
 
-    const features = new APIFeatures(Tour.find(), req.query).filter().sort().limit().paginate();
-    const tours = await features.query;
+exports.getTour = factory.getOne(Tour, { path: 'reviews' });
 
-    return res.status(200).json({
-        status: 'success',
-        results: tours.length,
-        data: {
-            tours: tours,
-        },
-    });
+exports.createTour = factory.createOne(Tour);
 
-});
+exports.updateTour = factory.updateOne(Tour);
 
-exports.getTour = catchAsync(async (req, res, next) => {
-    // populate => fill field up with data
-    const tour = await Tour.findById(req.params.id).populate('reviews')
-    //Tour.findOne({_id: req.params.id})
-    if (tour) {
-        return res.status(200).json({
-            status: 'success',
-            data: {
-                tour: tour,
-            },
-        });
-    }
-    else {
-        return next(new AppError('No tour found with that ID', 404));
-    }
-
-});
-
-exports.createTour = catchAsync(async (req, res, next) => {
-    const newTour = await Tour.create(req.body);
-    res.status(201).json({
-        status: 'success',
-        data: {
-            tour: newTour,
-        },
-    });
-
-});
-
-exports.updateTour = catchAsync(async (req, res, next) => {
-
-    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
-        runValidators: true
-    });
-    //returns the new updated document
-
-    if (tour) {
-        res.status(200).json({
-            status: 'success',
-            data: {
-                tour: tour,
-            },
-        });
-    }
-
-    else {
-        return next(new AppError('No tour with this ID was found', 404));
-    }
-
-});
-
-
-exports.deleteTour = catchAsync(async (req, res, next) => {
-
-    const tour = await Tour.findByIdAndDelete(req.params.id);
-
-    if (tour) {
-
-        res.status(204).json({
-            status: 'success',
-            data: null,
-        });
-    }
-    else {
-        return next(new AppError('No tour with such ID was found'));
-    }
-
-});
+exports.deleteTour = factory.deleteOne(Tour);
 
 exports.aliasTopTours = (req, res, next) => {
     req.query.limit = '5';
@@ -99,6 +24,7 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
 
     const stats = await Tour.aggregate([
         {
+            //filtering
             $match: { ratingsAverage: { $gte: 4.5 } }
         },
         {
@@ -183,3 +109,61 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
 
 
 });
+exports.getToursWithin = catchAsync(async (req, res, next) => {
+    const { distance, latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(',');
+    //radius is in radians, got by dividing by the radius of earth in milles or kms
+     const radius = unit ==='mi'?distance/3963.2:distance/6378.1
+
+    if (!lat || !lng) next(new AppError('Please provide latitude and longitude in this format: lat,lng', 400));
+
+    const tours = await Tour.find({ startLocation: { $geoWithin: { $centerSphere: [[lng, lat], radius] } } });
+
+    res.status(200).json({
+        status: 'success',
+        results:tours.length,
+        data:{
+            tours:tours
+        }
+    });
+});
+
+exports.getDistances = catchAsync(async(req, res, next)=>{
+    const { latlng, unit } = req.params;
+    const [lat, lng] = latlng.split(',');
+    //radius is in radians, got by dividing by the radius of earth in milles or kms
+
+    if (!lat || !lng) next(new AppError('Please provide latitude and longitude in this format: lat,lng', 400));
+
+    const multiplier = unit ==='mi'?0.000621371:0.001
+    const distances = await Tour.aggregate([
+        {
+            //must have a geo-spatial index before usage, if u have multiple geo-spatial indexes u have to use keys 
+            $geoNear:{
+                near: {
+                    type: 'Point',
+                    coordinates: [+lng, +lat]
+                },
+                distanceField: 'distance',
+                distanceMultiplier: multiplier
+            }
+        },
+
+        {
+            //like select
+            $project:{
+                distance:1,
+                name:1
+            }
+        }
+    ])
+
+    res.status(200).json({
+        status: 'success',
+        results:distances.length,
+        data:{
+            distances:distances
+        }
+    });
+
+})

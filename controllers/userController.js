@@ -1,27 +1,17 @@
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const factory = require('./handlerFactory');
 
 const filterObj = (obj, ...allowedFields) => {
-    const newObj ={}
+    const newObj = {};
     Object.keys(obj).forEach(el => {
         if (allowedFields.includes(el))
-        newObj[el]= obj[el]
+            newObj[el] = obj[el];
     });
+    return newObj;
 };
 
-exports.getAllUsers = catchAsync(async (req, res, next) => {
-    const users = await User.find();
-
-    return res.status(200).json({
-        status: 'success',
-        results: users.length,
-        data: {
-            users: users,
-        },
-    });
-
-});
 
 exports.updateMe = catchAsync(async (req, res, next) => {
     //1- create error if user POSTs password data
@@ -37,33 +27,28 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        data:{
+        data: {
             user
         }
     });
 });
 
-exports.deleteMe= catchAsync(async(req,res,next)=>{
+exports.deleteMe = catchAsync(async (req, res, next) => {
     //we wont delete the user, just set him inactive
-    await User.findByIdAndUpdate(req.user._id, {active:false})
+    await User.findByIdAndUpdate(req.user._id, { active: false });
 
     res.status(204).json({
-        status:"success",
-        data:null
-    })
-})
-exports.getUser = (req, res) => {
+        status: "success",
+        data: null
+    });
+});
 
+exports.getMe = (req, res, next) => {
+    req.params.id = req.user.id;
+    next();
 };
-
-exports.createUser = (req, res) => {
-
-};
-
-exports.updateUser = (req, res) => {
-
-};
-
-exports.deleteUser = (req, res) => {
-
-};
+exports.getAllUsers = factory.getAll(User);
+exports.getUser = factory.getOne(User);
+//Do not attempt to update passwords with it, will pass on 'save' middleware
+exports.updateUser = factory.updateOne(User);
+exports.deleteUser = factory.deleteOne(User);

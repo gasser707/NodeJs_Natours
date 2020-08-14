@@ -124,6 +124,11 @@ const tourSchema = new mongoose.Schema({
 
 });
 
+// we need indexes so that Mongo doesn't have to go and search through the whole db when its filtering for a doc 
+// with price range for example
+tourSchema.index({'startLocation.coordinates': '2dsphere'})//different as this is geo-spatial queries
+tourSchema.index({price: 1, ratingsAverage:-1})
+tourSchema.index({slug:1})
 tourSchema.virtual("durationWeeks").get(function () {
     return this.duration / 7;
     //this here refers to the current document
@@ -148,7 +153,7 @@ tourSchema.virtual('reviews', {
 // })
 
 
-//EMBEDDING USERS
+// EMBEDDING USERS
 
 // tourSchema.pre('save', async function (next) {
 //     const guidesPromise = this.guides.map(async id => await User.findById(id));
@@ -184,6 +189,15 @@ tourSchema.pre('save', function (next) {
 //     console.log('this took ' + (Date.now()- this.start) +' millisecs' )
 //     next()
 // })
+
+tourSchema.pre(/^find/, function(next) {
+    this.populate({
+      path: 'guides',
+      select: '-__v -passwordChangedAt'
+    });
+  
+    next();
+  });
 
 
 // //AGGREGATION MIDDLEWARE
