@@ -17,8 +17,8 @@ userRouter.patch('/resetPassword/:token', resetPassword);
 //starting here we protect all routes
 userRouter.use(protect)
 userRouter.patch('/updatePassword',updatePassword);
-userRouter.get('/me', upload.single('photo'),getMe, getUser);
-userRouter.patch('/updateMe', updateMe);
+userRouter.get('/me', getMe, getUser);
+userRouter.patch('/updateMe', upload.single('photo'),updateMe);
 userRouter.delete('/deleteMe', deleteMe);
 
 userRouter.use(restrictTo('admin'))
