@@ -12,18 +12,18 @@ const signToken = id => {
     });
 };
 
-const createSendToken = (user,statusCode, res)=>{
+const createSendToken = (user, statusCode, res) => {
 
     const token = signToken(user._id);
 
     const cookieOptions = {
-        expires: new Date(Date.now()+ process.env.JWT_COOKIE_EXPIRES_IN *24* 60 *60 * 1000),
-        httpOnly:true
-    }
-    if(process.env.NODE_ENV ==='production') cookieOptions.secure = true
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+        httpOnly: true
+    };
+    if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
-    res.cookie('jwt', token, cookieOptions)
-    user.password = undefined
+    res.cookie('jwt', token, cookieOptions);
+    user.password = undefined;
     res.status(statusCode).json({
         status: 'success',
         token: token,
@@ -32,7 +32,7 @@ const createSendToken = (user,statusCode, res)=>{
         }
     });
 
-}
+};
 
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -41,6 +41,8 @@ exports.protect = catchAsync(async (req, res, next) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
+    } else if (req.cookies.jwt) {
+        token = req.cookies.jwt;
     }
 
     if (!token) {
@@ -63,6 +65,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     //grant access to protected routes
 
     req.user = freshUser;
+    res.locals.user = freshUser
     next();
 
 });
@@ -141,7 +144,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
     //we use save to update because we want to run all validators and use save middleware function
     await user.save();
-    createSendToken(user, 200, res)
+    createSendToken(user, 200, res);
 });
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
@@ -160,7 +163,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
     let correct = await user.correctPassword(req.body.password, user.password);
 
-    if(!correct){
+    if (!correct) {
         return next(new AppError('This email-password combination does not exist', 401));
     }
 
@@ -169,7 +172,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
     await user.save();
 
-    createSendToken(user, 200, res)
+    createSendToken(user, 200, res);
 
 
 });
@@ -185,7 +188,7 @@ exports.signup = catchAsync(async (req, res, next) => {
         role: req.body.role
     });
 
-    createSendToken(newUser, 201, res)
+    createSendToken(newUser, 201, res);
 });
 
 
@@ -213,6 +216,53 @@ exports.login = catchAsync(async (req, res, next) => {
         return next(new AppError('This email-password combination is not found in our records', 401));
     }
 
-   createSendToken(user, 200, res)
+    createSendToken(user, 200, res);
 
 });
+
+//only for rendered pages, no errors!
+exports.isLoggedIn = async (req, res, next) => {
+    // 1- getting token and check it it's there
+
+    let token;
+    try {
+        if (req.cookies.jwt) {
+            token = req.cookies.jwt;
+            // 2- verification token 
+            const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+            // 3- check if user still exists
+            const freshUser = await User.findById(decoded.id);
+            if (!freshUser) {
+                return next();
+            }
+            // 4- check if user changed password after the token was issued
+            //iat => issued at
+            if (freshUser.changedPasswordAfter(decoded.iat)) {
+                return next();
+            }
+            //grant access to protected routes
+            //this is accessible to pug
+            res.locals.user = freshUser;
+            next();
+
+        }
+        if (!token) {
+            return next();
+        }
+    } catch (err) {
+        next();
+    }
+
+
+
+};
+
+exports.logout = (req, res) => {
+    res.cookie('jwt', 'loggedout', {
+      expires: new Date(Date.now() + 2 * 1000),
+      httpOnly: true
+    });
+    res.status(200).json({ status: 'success' });
+  };
+  

@@ -1,24 +1,44 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const morgan = require('morgan');
 const AppError = require('./utils/AppError');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
 //express.json is a middleware is function that modify the request data, if we remove it we don't get request in right form
+
 
 
 //Set security http headers
 app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      defaultSrc: ["'self'", 'http://127.0.0.1:3000/*', 'ws:'],
+      baseUri: ["'self'"],
+      fontSrc: ["'self'", 'https:', 'data:'],
+      scriptSrc: ["'self'", 'https://*.cloudflare.com', 'http://localhost:3000/'],
+      scriptSrc: ["'self'", 'https://*.stripe.com', 'https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js', 'http://localhost:3000/'],
+      frameSrc: ["'self'", 'https://*.stripe.com'],
+      objectSrc: ["'none'"],
+      styleSrc: ["'self'", 'https:', 'unsafe-inline'],
+      upgradeInsecureRequests: [],
+    },
+  })
+);
 
 //body parser - from body to req.body
 app.use(express.json({ limit: '10kb' }));
+app.use(cookieParser());
 
 //data sanitization against NOSQL query injection
 app.use(mongoSanitize());
@@ -42,8 +62,11 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
 //serving static files
-app.use(express.static(`${__dirname}/public`));
+app.use(express.static(path.join(__dirname, 'public')));
+
 //our own middleware
 // app.use((req, res, next) => {
 
@@ -56,10 +79,11 @@ app.use(express.static(`${__dirname}/public`));
 
 
 //this setup below is called making sub applications, we have different routers for different routes
-
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
+app.use('/', viewRouter);
+
 
 
 app.all('*', (req, res, next) => {

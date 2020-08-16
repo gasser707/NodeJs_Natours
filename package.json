@@ -7,12 +7,17 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
     "start:prod": " SET NODE_ENV=production&& nodemon server.js",
-    "debug": "ndb server.js"
+    "debug": "ndb server.js",
+    "watch:js": "parcel watch ./public/js/index.js --out-dir ./public/js --public-url /js --out-file bundle.js",
+    "build:js": "parcel watch ./public/js/index.js --out-dir ./public/js --out-file bundle.js"
   },
   "author": "Gasser Aly",
   "license": "ISC",
   "dependencies": {
+    "@babel/polyfill": "^7.10.4",
+    "axios": "^0.19.2",
     "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-mongo-sanitize": "^2.0.0",
@@ -22,7 +27,10 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.9.26",
     "morgan": "^1.10.0",
+    "multer": "^1.4.2",
     "nodemailer": "^6.4.11",
+    "parcel-bundler": "^1.12.4",
+    "pug": "^3.0.0",
     "slugify": "^1.4.5",
     "validator": "^13.1.1",
     "xss-clean": "^0.1.1"
