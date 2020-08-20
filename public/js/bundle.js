@@ -6610,25 +6610,19 @@ var displayMap = function displayMap(locations) {
   var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/gasser/ckdw0sc2x23lo19paquvkkfct',
-    // stylesheet location
-    // center: [-118.113491,34.111745,], // starting position [lng, lat]
-    // zoom: 9,// starting zoom
     scrollZoom: false
   });
   var bounds = new mapboxgl.LngLatBounds();
   locations.forEach(function (loc) {
-    //create marker
     var el = document.createElement('div');
-    el.className = 'marker'; //add marker
-
+    el.className = 'marker';
     new mapboxgl.Marker({
       element: el,
       anchor: 'bottom'
     }).setLngLat(loc.coordinates).addTo(map);
     new mapboxgl.Popup({
       offset: 30
-    }).setLngLat(loc.coordinates).setHTML("<p>Day ".concat(loc.day, ": ").concat(loc.description, "</p>")).addTo(map); //extend map bounds to include current location
-
+    }).setLngLat(loc.coordinates).setHTML("<p>Day ".concat(loc.day, ": ").concat(loc.description, "</p>")).addTo(map);
     bounds.extend(loc.coordinates);
   });
   map.fitBounds(bounds, {
@@ -8510,8 +8504,7 @@ var logout = /*#__PURE__*/function () {
 
           case 3:
             res = _context2.sent;
-            (0, _alerts.showAlert)('success', 'logged out successfully!'); //force server to reload not browser cache
-
+            (0, _alerts.showAlert)('success', 'logged out successfully!');
             location.assign('/');
             _context2.next = 11;
             break;
@@ -8603,7 +8596,6 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-//type is either data or password
 var updateData = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(data, type) {
     var url;
@@ -8674,36 +8666,32 @@ var bookTour = /*#__PURE__*/function () {
         switch (_context.prev = _context.next) {
           case 0:
             _context.prev = 0;
-            stripe = Stripe('pk_test_51HHcq2Ho33ABNkeREGGt62m3xmaUtpO3E4tzmtc2FCpJvj2s3oqW9wubdZlvX9zL5JfF84mFD5TgP8AHE8Pf90Zm00rAHZSEIe'); //1- get session from server endpoint
-
+            stripe = Stripe('pk_test_51HHcq2Ho33ABNkeREGGt62m3xmaUtpO3E4tzmtc2FCpJvj2s3oqW9wubdZlvX9zL5JfF84mFD5TgP8AHE8Pf90Zm00rAHZSEIe');
             _context.next = 4;
             return _axios.default.get("/api/v1/bookings/checkout-session/".concat(tourId));
 
           case 4:
             session = _context.sent;
-            console.log(session); //2- use stripe object to create form and charge credit card
-
-            _context.next = 8;
+            _context.next = 7;
             return stripe.redirectToCheckout({
               sessionId: session.data.session.id
             });
 
-          case 8:
-            _context.next = 14;
+          case 7:
+            _context.next = 12;
             break;
 
-          case 10:
-            _context.prev = 10;
+          case 9:
+            _context.prev = 9;
             _context.t0 = _context["catch"](0);
-            console.log(_context.t0);
             (0, _alerts.showAlert)('error', _context.t0);
 
-          case 14:
+          case 12:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[0, 10]]);
+    }, _callee, null, [[0, 9]]);
   }));
 
   return function bookTour(_x) {
@@ -9042,21 +9030,20 @@ if (userPasswordForm) {
               password = document.getElementById('password-current').value;
               newPassword = document.getElementById('password').value;
               confirmPassword = document.getElementById('password-confirm').value;
-              console.log(password, newPassword, confirmPassword);
-              _context.next = 8;
+              _context.next = 7;
               return (0, _updateSettings.updateData)({
                 password: password,
                 newPassword: newPassword,
                 confirmPassword: confirmPassword
               }, 'password');
 
-            case 8:
+            case 7:
               document.querySelector('.btn--save-password').textContent = 'Save password';
               password = (_readOnlyError("password"), document.getElementById('password-current').textContent = '');
               newPassword = (_readOnlyError("newPassword"), document.getElementById('password').textContent = '');
               confirmPassword = (_readOnlyError("confirmPassword"), document.getElementById('password-confirm').textContent = '');
 
-            case 12:
+            case 11:
             case "end":
               return _context.stop();
           }
@@ -9072,8 +9059,6 @@ if (userPasswordForm) {
 
 if (bookBtn) {
   bookBtn.addEventListener('click', function (e) {
-    //comes from data-tour-id
-    //could us  const {tourId}= e.target.dataset
     e.target.textContent = 'Processing...';
     var tourId = e.target.dataset.tourId;
     (0, _stripe.bookTour)(tourId);
@@ -9109,7 +9094,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53069" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53715" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -9286,4 +9271,4 @@ function hmrAcceptRun(bundle, id) {
   }
 }
 },{}]},{},["../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
-//# sourceMappingURL=/js/bundle.js.map
+//# sourceMappingURL=/bundle.js.map
