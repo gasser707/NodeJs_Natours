@@ -12,9 +12,7 @@ class APIFeatures {
         excludedFields.forEach(el => {
             delete queryObj[el];
         });
-        // const tours = await Tour.find().where('duration').equals(5).where('difficulty').equals('easy');
-
-        //we do that to be able to apply sort and find methods
+       
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
 
@@ -51,11 +49,7 @@ class APIFeatures {
         const page = +this.queryString.page || 1;
 
         const limit = +this.queryString.limit || 10;
-        //lets say limit is 10 , so on page 2 i have to skip the first 10 values 
         const skip = (page - 1) * limit;
-
-
-        // query.sort().select().skip().limit().... this is why we await at the very end
         this.query = this.query.skip(skip).limit(limit);
 
         return this;
