@@ -36,3 +36,25 @@ export const logout = async () => {
 
     }
 };
+
+
+export const signup = async (email, password, confirmPassword,name)=>{
+    try {
+        const res = await axios({
+            method: 'POST',
+            url: '/api/v1/users/signup',
+            data: {
+                name,
+                email,
+                password,
+                confirmPassword
+            }
+        });
+
+        showAlert('success', 'signed up successfully!');
+        location.assign('/');
+
+    } catch (err) {
+        showAlert('error', err.response.data.message);
+    };
+};
