@@ -11,8 +11,6 @@ userRouter.get('/logout', logout)
 userRouter.post('/forgotPassword', forgotPassword);
 userRouter.patch('/resetPassword/:token', resetPassword);
 
-
-//starting here we protect all routes
 userRouter.use(protect)
 userRouter.patch('/updatePassword',updatePassword);
 userRouter.get('/me', getMe, getUser);

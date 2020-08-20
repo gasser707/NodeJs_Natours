@@ -24,9 +24,7 @@ exports.updateOne = Model => catchAsync(async (req, res, next) => {
         new: true,
         runValidators: true
     });
-    //returns the new updated document
-
-    if (doc) {
+       if (doc) {
         res.status(200).json({
             status: 'success',
             data: {
@@ -53,13 +51,11 @@ exports.createOne = Model => catchAsync(async (req, res, next) => {
 });
 
 exports.getOne = (Model, populateOptions) => catchAsync(async (req, res, next) => {
-    // populate => fill field up with data
     let query = Model.findById(req.params.id) 
     if(populateOptions){
         query= query.populate(populateOptions)
     }
     const doc = await query
-    //Tour.findOne({_id: req.params.id})
     if (doc) {
         return res.status(200).json({
             status: 'success',
@@ -75,7 +71,6 @@ exports.getOne = (Model, populateOptions) => catchAsync(async (req, res, next) =
 });
 
 exports.getAll = Model =>catchAsync(async (req, res, next) => {
-      //to allow for nested get reviews on tour
       let filter={};
       if(req.params.tourId){
           filter ={
@@ -95,5 +90,3 @@ exports.getAll = Model =>catchAsync(async (req, res, next) => {
     });
 
 });
-// This works because of javascript closures, the inner function gets access to outer function vars even when the 
-//other value has returned 

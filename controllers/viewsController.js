@@ -27,8 +27,7 @@ exports.getTour = catchAsync(async (req, res, next) => {
                 'Content-Security-Policy',
                 "default-src 'self' https://*.mapbox.com https://js.stripe.com/ ws:; base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://cdnjs.cloudflare.com https://api.mapbox.com https://js.stripe.com/v3/ 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
             )
-            // .set("Set-Cookie", "HttpOnly;Secure;SameSite=Strict",'Content-Security-Policy',
-            // "default-src 'self' https://*.mapbox.com ;base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://cdnjs.cloudflare.com https://api.mapbox.com 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
+         
             .render('tour', {
                 tour: tour,
                 title: tour.name
@@ -59,7 +58,6 @@ exports.getAccount = (req, res) => {
 };
 
 exports.getMyTours = catchAsync(async(req, res, next) => {
-    //1- find all bookings
         const bookings = await Booking.find({user:req.user.id});
         const tourIds = bookings.map(el=>el.tour)
         const tours = await Tour.find({_id: {$in: tourIds}})
@@ -68,8 +66,4 @@ exports.getMyTours = catchAsync(async(req, res, next) => {
             title:'Booked Tours',
             tours
         })
-
-
-    //2- find tours with returned ids
-
 });

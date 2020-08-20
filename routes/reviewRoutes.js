@@ -1,6 +1,5 @@
 const express = require('express');
 
-//to accept params from tourRoute
 const reviewRouter = express.Router({ mergeParams: true });
 
 const { protect, restrictTo } = require('../controllers/authController');

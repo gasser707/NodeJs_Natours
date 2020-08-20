@@ -77,7 +77,6 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
 
     const stats = await Tour.aggregate([
         {
-            //filtering
             $match: { ratingsAverage: { $gte: 4.5 } }
         },
         {
@@ -93,7 +92,6 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
             }
         },
         {
-            //have to use same name avgPrice
             $sort: {
                 avgPrice: 1
             }
@@ -128,7 +126,6 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
             }
         },
         {
-            //where accumulation happens
             $group: {
                 _id: { $month: '$startDates' },
                 numTourStarts: { $sum: 1 },
@@ -147,9 +144,7 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
         {
             $sort: { numTourStarts: -1 }
         },
-        // { cuts to 6 results only
-        //     $limit:6
-        // }
+  
     ]);
 
     res.status(200).json({
@@ -165,7 +160,6 @@ exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
 exports.getToursWithin = catchAsync(async (req, res, next) => {
     const { distance, latlng, unit } = req.params;
     const [lat, lng] = latlng.split(',');
-    //radius is in radians, got by dividing by the radius of earth in milles or kms
     const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
 
     if (!lat || !lng) next(new AppError('Please provide latitude and longitude in this format: lat,lng', 400));
@@ -184,14 +178,11 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
 exports.getDistances = catchAsync(async (req, res, next) => {
     const { latlng, unit } = req.params;
     const [lat, lng] = latlng.split(',');
-    //radius is in radians, got by dividing by the radius of earth in milles or kms
-
     if (!lat || !lng) next(new AppError('Please provide latitude and longitude in this format: lat,lng', 400));
 
     const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
     const distances = await Tour.aggregate([
         {
-            //must have a geo-spatial index before usage, if u have multiple geo-spatial indexes u have to use keys 
             $geoNear: {
                 near: {
                     type: 'Point',
@@ -203,7 +194,6 @@ exports.getDistances = catchAsync(async (req, res, next) => {
         },
 
         {
-            //like select
             $project: {
                 distance: 1,
                 name: 1
