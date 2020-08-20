@@ -59,7 +59,6 @@ if (userPasswordForm) {
         const password = document.getElementById('password-current').value;
         const newPassword = document.getElementById('password').value;
         const confirmPassword = document.getElementById('password-confirm').value;
-        console.log(password, newPassword, confirmPassword);
         await updateData({ password, newPassword, confirmPassword }, 'password');
 
         document.querySelector('.btn--save-password').textContent = 'Save password';
@@ -71,8 +70,7 @@ if (userPasswordForm) {
 
 if(bookBtn){
     bookBtn.addEventListener('click', e=>{
-        //comes from data-tour-id
-        //could us  const {tourId}= e.target.dataset
+       
         e.target.textContent='Processing...'
         const tourId = e.target.dataset.tourId
         bookTour(tourId)

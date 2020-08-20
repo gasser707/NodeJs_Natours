@@ -4,7 +4,6 @@ const factory = require('./handlerFactory')
 
 
 exports.SetTourId = (req, res, next) => {
-    //we leave an option to define these params if you want
     if(!req.body.tour){
         req.body.tour=req.params.tourId
     }

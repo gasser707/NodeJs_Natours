@@ -28,7 +28,6 @@ export const logout = async () => {
             url: '/api/v1/users/logout'
         });
         showAlert('success', 'logged out successfully!');
-        //force server to reload not browser cache
         location.assign('/')
 
     } catch (err) {

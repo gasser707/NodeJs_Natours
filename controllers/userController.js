@@ -36,20 +36,6 @@ exports.resizeUserPhoto = catchAsync(async (req, res, next) => {
   next();
 });
 
-// const multiStorage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'public/img/users');
-//     },
-//     filename: (req, file, cb) => {
-//         const ext = file.mimetype.split('/')[1];
-//         cb(null, `user-${req.user.id}-${Date.now()}.${ext}`);
-//     }
-// });
-
-
-
-
-
 const filterObj = (obj, ...allowedFields) => {
     const newObj = {};
     Object.keys(obj).forEach(el => {
@@ -61,13 +47,11 @@ const filterObj = (obj, ...allowedFields) => {
 
 
 exports.updateMe = catchAsync(async (req, res, next) => {
-    //1- create error if user POSTs password data
 
     if (req.body.password || req.body.confirmPassword) {
         return next(new AppError('This route is not for password updates. please use /updatePassword', 400));
     }
 
-    //sadly save() wont work as the user fetched from the db doesn't have a confirm password field which is required here
     const filteredBody = filterObj(req.body, 'name', 'email');
     if (req.file)
         filteredBody.photo = req.file.filename;
@@ -83,7 +67,6 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteMe = catchAsync(async (req, res, next) => {
-    //we wont delete the user, just set him inactive
     await User.findByIdAndUpdate(req.user._id, { active: false });
 
     res.status(204).json({
@@ -98,6 +81,5 @@ exports.getMe = (req, res, next) => {
 };
 exports.getAllUsers = factory.getAll(User);
 exports.getUser = factory.getOne(User);
-//Do not attempt to update passwords with it, will pass on 'save' middleware
 exports.updateUser = factory.updateOne(User);
 exports.deleteUser = factory.deleteOne(User);

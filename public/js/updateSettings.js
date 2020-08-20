@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { showAlert } from './alerts';
-//type is either data or password
 export const updateData = async (data, type) => {
     let url;
     if(type==='password'){
