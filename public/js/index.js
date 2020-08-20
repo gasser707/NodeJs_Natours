@@ -2,12 +2,14 @@ import '@babel/polyfill';
 import { displayMap } from './mapbox';
 import { login, logout } from './login';
 import { updateData } from './updateSettings';
+import { bookTour } from './stripe';
 
 const mapBox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
 const logoutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
+const bookBtn = document.getElementById('book-tour')
 if (mapBox) {
     const locations = JSON.parse(mapBox.dataset.locations);
     displayMap(locations);
@@ -28,9 +30,11 @@ if (loginForm) {
 if (userDataForm) {
     userDataForm.addEventListener('submit', e => {
         e.preventDefault();
-        const email = document.getElementById('email').value;
-        const name = document.getElementById('name').value;
-        updateData({ name, email }, 'data');
+        const form = new FormData();
+        form.append('name', document.getElementById('name').value);
+        form.append('email', document.getElementById('email').value);
+        form.append('photo', document.getElementById('photo').files[0]);
+        updateData(form, 'data');
     });
 }
 
@@ -49,6 +53,16 @@ if (userPasswordForm) {
         newPassword = document.getElementById('password').textContent = '';
         confirmPassword = document.getElementById('password-confirm').textContent = '';
     });
+}
+
+if(bookBtn){
+    bookBtn.addEventListener('click', e=>{
+        //comes from data-tour-id
+        //could us  const {tourId}= e.target.dataset
+        e.target.textContent='Processing...'
+        const tourId = e.target.dataset.tourId
+        bookTour(tourId)
+    })
 }
 
 if (logoutBtn) logoutBtn.addEventListener('click', logout);

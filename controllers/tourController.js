@@ -2,6 +2,59 @@ const catchAsync = require('../utils/catchAsync');
 const Tour = require('.//../models/tourModel');
 const factory = require('./handlerFactory');
 const AppError = require('../utils/AppError');
+const multer = require('multer');
+const sharp = require('sharp');
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+    if (file.mimetype.startsWith('image')) {
+        cb(null, true);
+    } else {
+        cb(new AppError('Not an image! Please upload only images.', 400), false);
+    }
+};
+const upload = multer({
+    storage: multerStorage,
+    fileFilter: multerFilter
+});
+
+
+exports.uploadTourImages = upload.fields([
+    { name: 'imageCover', maxCount: 1 },
+    { name: 'images', maxCount: 3 }
+]);
+
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+    if (!req.files|| (!req.files.imageCover&&!req.files.images)) {
+        return next();
+    }
+
+    const imageCoverFilename = `tour-${req.params.id}-${Date.now()}-cover.jpeg`;
+    await sharp(req.files.imageCover[0].buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/tours/${imageCoverFilename}`);
+    req.body.imageCover = imageCoverFilename;
+    req.body.images = [];
+    await Promise.all(
+        req.files.images.map(async (file, i) => {
+            const filename = `tour-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+            await sharp(req.files.images[i].buffer)
+                .resize(2000, 1333)
+                .toFormat('jpeg')
+                .jpeg({ quality: 90 })
+                .toFile(`public/img/tours/${filename}`);
+            req.body.images.push(filename);
+
+        })
+    );
+
+
+    next();
+});
 
 exports.getAllTours = factory.getAll(Tour);
 
@@ -113,7 +166,7 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
     const { distance, latlng, unit } = req.params;
     const [lat, lng] = latlng.split(',');
     //radius is in radians, got by dividing by the radius of earth in milles or kms
-     const radius = unit ==='mi'?distance/3963.2:distance/6378.1
+    const radius = unit === 'mi' ? distance / 3963.2 : distance / 6378.1;
 
     if (!lat || !lng) next(new AppError('Please provide latitude and longitude in this format: lat,lng', 400));
 
@@ -121,25 +174,25 @@ exports.getToursWithin = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
         status: 'success',
-        results:tours.length,
-        data:{
-            tours:tours
+        results: tours.length,
+        data: {
+            tours: tours
         }
     });
 });
 
-exports.getDistances = catchAsync(async(req, res, next)=>{
+exports.getDistances = catchAsync(async (req, res, next) => {
     const { latlng, unit } = req.params;
     const [lat, lng] = latlng.split(',');
     //radius is in radians, got by dividing by the radius of earth in milles or kms
 
     if (!lat || !lng) next(new AppError('Please provide latitude and longitude in this format: lat,lng', 400));
 
-    const multiplier = unit ==='mi'?0.000621371:0.001
+    const multiplier = unit === 'mi' ? 0.000621371 : 0.001;
     const distances = await Tour.aggregate([
         {
             //must have a geo-spatial index before usage, if u have multiple geo-spatial indexes u have to use keys 
-            $geoNear:{
+            $geoNear: {
                 near: {
                     type: 'Point',
                     coordinates: [+lng, +lat]
@@ -151,19 +204,19 @@ exports.getDistances = catchAsync(async(req, res, next)=>{
 
         {
             //like select
-            $project:{
-                distance:1,
-                name:1
+            $project: {
+                distance: 1,
+                name: 1
             }
         }
-    ])
+    ]);
 
     res.status(200).json({
         status: 'success',
-        results:distances.length,
-        data:{
-            distances:distances
+        results: distances.length,
+        data: {
+            distances: distances
         }
     });
 
-})
+});

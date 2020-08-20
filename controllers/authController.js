@@ -2,7 +2,7 @@ const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const jwt = require('jsonwebtoken');
 const AppError = require('../utils/AppError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 const { promisify } = require('util');
 const crypto = require('crypto');
 
@@ -37,13 +37,13 @@ const createSendToken = (user, statusCode, res) => {
 
 exports.protect = catchAsync(async (req, res, next) => {
     // 1- getting token and check it it's there
-
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         token = req.headers.authorization.split(' ')[1];
     } else if (req.cookies.jwt) {
         token = req.cookies.jwt;
     }
+    
 
     if (!token) {
         return next(new AppError('You need to login to access this page', 401));
@@ -65,7 +65,7 @@ exports.protect = catchAsync(async (req, res, next) => {
     //grant access to protected routes
 
     req.user = freshUser;
-    res.locals.user = freshUser
+    res.locals.user = freshUser;
     next();
 
 });
@@ -94,17 +94,19 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
     await user.save({ validateBeforeSave: false });
     //3- send it to user's email
     const resetURL = `${req.protocol}://${req.get('host')}/api/v1/resetPassword/${resetToken}`;
-    const message = `Forgot your password? click here to reset your password:${resetURL}\n
-    if you didn't then please ignore this email `;
+    // const message = `Forgot your password? click here to reset your password:${resetURL}\n
+    // if you didn't then please ignore this email `;
 
 
     try {
 
-        await sendEmail({
-            email: user.email,
-            subject: 'Reset your password in 10 mins',
-            message: message
-        });
+        // await sendEmail({
+        //     email: user.email,
+        //     subject: 'Reset your password in 10 mins',
+        //     message: message
+        // });
+
+        await new Email(user, resetURL).sendPasswordReset()
 
         res.status(200).json({
             status: 'success',
@@ -187,8 +189,10 @@ exports.signup = catchAsync(async (req, res, next) => {
         passwordChangedAt: req.body.passwordChangedAt,
         role: req.body.role
     });
-
+    const url = `${req.protocol}://${req.get('host')}/me`
+    await new Email(newUser, url).sendWelcome();
     createSendToken(newUser, 201, res);
+
 });
 
 
@@ -260,9 +264,8 @@ exports.isLoggedIn = async (req, res, next) => {
 
 exports.logout = (req, res) => {
     res.cookie('jwt', 'loggedout', {
-      expires: new Date(Date.now() + 2 * 1000),
-      httpOnly: true
+        expires: new Date(Date.now() + 2 * 1000),
+        httpOnly: true
     });
     res.status(200).json({ status: 'success' });
-  };
-  
+};

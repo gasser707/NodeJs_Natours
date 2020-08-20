@@ -102,6 +102,3 @@ const Review = mongoose.model('Review', reviewSchema);
 module.exports = Review;
 
 
-//post /tour/745e44236/reviews
-//get /tour/23455/reviews
-//get /tour/4354/reviews/4r43t45

@@ -1,4 +1,5 @@
 const Tour = require('../models/tourModel');
+const Booking = require('../models/bookingModel')
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 
@@ -16,7 +17,7 @@ exports.getOverview = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.getTour = catchAsync(async (req, res,next) => {
+exports.getTour = catchAsync(async (req, res, next) => {
 
     const tour = await Tour.findOne({ slug: req.params.slug }).populate({ path: 'reviews', fields: 'review rating user' });
     if (tour) {
@@ -24,7 +25,7 @@ exports.getTour = catchAsync(async (req, res,next) => {
             .status(200)
             .set(
                 'Content-Security-Policy',
-                "default-src 'self' https://*.mapbox.com ;base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://cdnjs.cloudflare.com https://api.mapbox.com 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
+                "default-src 'self' https://*.mapbox.com https://js.stripe.com/ ws:; base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://cdnjs.cloudflare.com https://api.mapbox.com https://js.stripe.com/v3/ 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
             )
             // .set("Set-Cookie", "HttpOnly;Secure;SameSite=Strict",'Content-Security-Policy',
             // "default-src 'self' https://*.mapbox.com ;base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://cdnjs.cloudflare.com https://api.mapbox.com 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
@@ -34,7 +35,7 @@ exports.getTour = catchAsync(async (req, res,next) => {
             });
 
     }
-    return next(new AppError('There is no such tour in our program', 404))
+    return next(new AppError('There is no such tour in our program', 404));
 });
 
 exports.login = catchAsync(async (req, res) => {
@@ -45,8 +46,24 @@ exports.login = catchAsync(async (req, res) => {
         });
 });
 
-exports.getAccount = (req, res)=>{
-    res.status(200).render('account',{
-        title:'Your Account'
-    })
-}
+exports.getAccount = (req, res) => {
+    res.status(200).render('account', {
+        title: 'Your Account'
+    });
+};
+
+exports.getMyTours = catchAsync(async(req, res, next) => {
+    //1- find all bookings
+        const bookings = await Booking.find({user:req.user.id});
+        const tourIds = bookings.map(el=>el.tour)
+        const tours = await Tour.find({_id: {$in: tourIds}})
+
+        res.status(200).render('overview', {
+            title:'Booked Tours',
+            tours
+        })
+
+
+    //2- find tours with returned ids
+
+});

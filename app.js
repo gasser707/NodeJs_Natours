@@ -2,11 +2,6 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const morgan = require('morgan');
-const AppError = require('./utils/AppError');
-const tourRouter = require('./routes/tourRoutes');
-const userRouter = require('./routes/userRoutes');
-const reviewRouter = require('./routes/reviewRoutes');
-const viewRouter = require('./routes/viewRoutes');
 const globalErrorHandler = require('./controllers/errorController');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
@@ -14,6 +9,13 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 const hpp = require('hpp');
 const cookieParser = require('cookie-parser');
+const AppError = require('./utils/AppError');
+const tourRouter = require('./routes/tourRoutes');
+const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
+const viewRouter = require('./routes/viewRoutes');
+const bookingRouter = require('./routes/bookingRoutes')
+
 //express.json is a middleware is function that modify the request data, if we remove it we don't get request in right form
 
 
@@ -83,6 +85,7 @@ app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
 app.use('/', viewRouter);
+app.use('/api/v1/bookings', bookingRouter)
 
 
 
