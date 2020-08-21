@@ -19,7 +19,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
                 name: `${tour.name} Tour`,
                 description: tour.summary,
                 images: [
-                    `https://g-tours.herokuapp.com/img/tours/${tour.imageCover}.jpg`
+                    `https://g-tours.herokuapp.com/img/tours/${tour.imageCover}`
                 ],
                 amount: tour.price * 100,
                 currency: 'usd',
@@ -52,7 +52,7 @@ exports.webhookCheckout = (req, res, next) => {
         return res.status(400).send('webhook err: ' + err.message);
     }
     if (event.type === 'checkout.session.completed')
-        createBookingCheckout(event.data.object);
+    this.createBookingCheckout(event.data.object);
 
     res.status(200).json({ received: true });
 
