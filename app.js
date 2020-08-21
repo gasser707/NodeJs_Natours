@@ -15,7 +15,8 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
-const compression = require('compression')
+const compression = require('compression');
+const cors = require('cors');
 
 //express.json is a middleware is function that modify the request data, if we remove it we don't get request in right form
 
@@ -38,10 +39,12 @@ app.use(
 );
 
 //body parser - from body to req.body
-app.enable('trust proxy')
+app.enable('trust proxy');
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
-app.use(compression())
+app.use(compression());
+app.use(cors());
+app.options('*', cors());
 //data sanitization against NOSQL query injection
 app.use(mongoSanitize());
 
