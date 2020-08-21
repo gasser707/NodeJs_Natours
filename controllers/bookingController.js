@@ -36,6 +36,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 });
 
 const createBookingCheckout = catchAsync(async (session) => {
+    try{
     console.log(11)
     const tour = session.client_reference_id;
     const myUser = (await User.findOne({ email: session.customer_email })).id;
@@ -43,6 +44,9 @@ const createBookingCheckout = catchAsync(async (session) => {
     console.log(14)
     await Booking.create({ tour, myUser, price });
     console.log(10)
+    }catch(err){
+        console.log('err here ',  err.message)
+    }
 });
 
 exports.webhookCheckout = catchAsync(async(req, res,next) => {
