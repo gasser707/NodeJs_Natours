@@ -39,16 +39,27 @@ app.use(
   })
 );
 
+
+
+app.enable('trust proxy');
+
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
+app.use(cors());
+app.options('*', cors());
+//serving static files
+app.use(express.static(path.join(__dirname, 'public')));
+
 //we need the req to not be json it had to be raw format
 app.post('/webhook-checkout', express.raw({type:'application/json'}),webhookCheckout)
 
 //body parser - from body to req.body
-app.enable('trust proxy');
 app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 app.use(compression());
-app.use(cors());
-app.options('*', cors());
+
 //data sanitization against NOSQL query injection
 app.use(mongoSanitize());
 
@@ -71,10 +82,6 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views'));
-//serving static files
-app.use(express.static(path.join(__dirname, 'public')));
 
 //our own middleware
 // app.use((req, res, next) => {
