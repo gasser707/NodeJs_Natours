@@ -1,5 +1,5 @@
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appErrorsalma');
+const appError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
 exports.deleteOne = Model => catchAsync(async (req, res, next) => {
 
@@ -13,7 +13,7 @@ exports.deleteOne = Model => catchAsync(async (req, res, next) => {
         });
     }
     else {
-        return next(new AppError('No document with such ID was found'));
+        return next(new appError('No document with such ID was found'));
     }
 
 });
@@ -24,7 +24,7 @@ exports.updateOne = Model => catchAsync(async (req, res, next) => {
         new: true,
         runValidators: true
     });
-       if (doc) {
+    if (doc) {
         res.status(200).json({
             status: 'success',
             data: {
@@ -34,7 +34,7 @@ exports.updateOne = Model => catchAsync(async (req, res, next) => {
     }
 
     else {
-        return next(new AppError('No document with this ID was found', 404));
+        return next(new appError('No document with this ID was found', 404));
     }
 
 });
@@ -51,11 +51,11 @@ exports.createOne = Model => catchAsync(async (req, res, next) => {
 });
 
 exports.getOne = (Model, populateOptions) => catchAsync(async (req, res, next) => {
-    let query = Model.findById(req.params.id) 
-    if(populateOptions){
-        query= query.populate(populateOptions)
+    let query = Model.findById(req.params.id);
+    if (populateOptions) {
+        query = query.populate(populateOptions);
     }
-    const doc = await query
+    const doc = await query;
     if (doc) {
         return res.status(200).json({
             status: 'success',
@@ -65,21 +65,21 @@ exports.getOne = (Model, populateOptions) => catchAsync(async (req, res, next) =
         });
     }
     else {
-        return next(new AppError('No tour found with that ID', 404));
+        return next(new appError('No tour found with that ID', 404));
     }
 
 });
 
-exports.getAll = Model =>catchAsync(async (req, res, next) => {
-      let filter={};
-      if(req.params.tourId){
-          filter ={
-              tour:req.params.tourId
-          }
-      }
+exports.getAll = Model => catchAsync(async (req, res, next) => {
+    let filter = {};
+    if (req.params.tourId) {
+        filter = {
+            tour: req.params.tourId
+        };
+    }
 
     const features = new APIFeatures(Model.find(filter), req.query).filter().sort().limit().paginate();
-    const doc = await features.query
+    const doc = await features.query;
 
     return res.status(200).json({
         status: 'success',

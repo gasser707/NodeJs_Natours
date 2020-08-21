@@ -1,7 +1,7 @@
 const Tour = require('../models/tourModel');
-const Booking = require('../models/bookingModel')
+const Booking = require('../models/bookingModel');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appErrorsalma');
+const appError = require('../utils/appError');
 
 exports.getOverview = catchAsync(async (req, res, next) => {
     //1- get tour data from backend
@@ -27,14 +27,14 @@ exports.getTour = catchAsync(async (req, res, next) => {
                 'Content-Security-Policy',
                 "default-src 'self' https://*.mapbox.com https://js.stripe.com/ ws:; base-uri 'self';block-all-mixed-content;font-src 'self' https: data:;frame-ancestors 'self';img-src 'self' data:;object-src 'none';script-src https://cdnjs.cloudflare.com https://api.mapbox.com https://js.stripe.com/v3/ 'self' blob: ;script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests;"
             )
-         
+
             .render('tour', {
                 tour: tour,
                 title: tour.name
             });
 
     }
-    return next(new AppError('There is no such tour in our program', 404));
+    return next(new appError('There is no such tour in our program', 404));
 });
 
 exports.login = catchAsync(async (req, res) => {
@@ -57,13 +57,13 @@ exports.getAccount = (req, res) => {
     });
 };
 
-exports.getMyTours = catchAsync(async(req, res, next) => {
-        const bookings = await Booking.find({user:req.user.id});
-        const tourIds = bookings.map(el=>el.tour)
-        const tours = await Tour.find({_id: {$in: tourIds}})
+exports.getMyTours = catchAsync(async (req, res, next) => {
+    const bookings = await Booking.find({ user: req.user.id });
+    const tourIds = bookings.map(el => el.tour);
+    const tours = await Tour.find({ _id: { $in: tourIds } });
 
-        res.status(200).render('overview', {
-            title:'Booked Tours',
-            tours
-        })
+    res.status(200).render('overview', {
+        title: 'Booked Tours',
+        tours
+    });
 });

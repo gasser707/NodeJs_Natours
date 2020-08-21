@@ -1,7 +1,7 @@
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const jwt = require('jsonwebtoken');
-const AppError = require('../utils/appErrorsalma');
+const appError = require('../utils/appError');
 const Email = require('../utils/email');
 const { promisify } = require('util');
 const crypto = require('crypto');
@@ -42,20 +42,20 @@ exports.protect = catchAsync(async (req, res, next) => {
     } else if (req.cookies.jwt) {
         token = req.cookies.jwt;
     }
-    
+
     if (!token) {
-        return next(new AppError('You need to login to access this page', 401));
+        return next(new appError('You need to login to access this page', 401));
     }
 
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
     const freshUser = await User.findById(decoded.id);
     if (!freshUser) {
-        return next(new AppError('The user of this token no longer exists', 401));
+        return next(new appError('The user of this token no longer exists', 401));
     }
-   
+
     if (freshUser.changedPasswordAfter(decoded.iat)) {
-        return next(new AppError('Password has been changed recently, please try to login again', 401));
+        return next(new appError('Password has been changed recently, please try to login again', 401));
     }
     req.user = freshUser;
     res.locals.user = freshUser;
@@ -66,7 +66,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.restrictTo = (...roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
-            return next(new AppError(`You do not have permission to perform this action`, 403));
+            return next(new appError(`You do not have permission to perform this action`, 403));
         }
         next();
     };
@@ -75,7 +75,7 @@ exports.restrictTo = (...roles) => {
 exports.forgotPassword = catchAsync(async (req, res, next) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-        return next(new AppError('There is no user with such email', 404));
+        return next(new appError('There is no user with such email', 404));
     }
     const resetToken = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
@@ -83,7 +83,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
     try {
 
-        await new Email(user, resetURL).sendPasswordReset()
+        await new Email(user, resetURL).sendPasswordReset();
 
         res.status(200).json({
             status: 'success',
@@ -95,7 +95,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
         user.passwordResetToken = undefined;
         user.passwordResetExpired = undefined;
         await user.save({ validateBeforeSave: false });
-        return next(new AppError('There was an error sending the email, please try again', 500));
+        return next(new appError('There was an error sending the email, please try again', 500));
     }
 });
 
@@ -106,7 +106,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     const user = await User.findOne({ passwordResetToken: hashedToken, passwordResetExpires: { $gt: Date.now() } });
 
     if (!user) {
-        return next(new AppError('Token is invalid or has expired', 400));
+        return next(new appError('Token is invalid or has expired', 400));
     }
 
     user.password = req.body.password;
@@ -119,15 +119,15 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
 
 exports.updatePassword = catchAsync(async (req, res, next) => {
     const user = await User.findById(req.user._id).select('+password');
-    
+
     if (!user) {
-        return next(new AppError('This email-password combination does not exist', 401));
+        return next(new appError('This email-password combination does not exist', 401));
     }
 
     let correct = await user.correctPassword(req.body.password, user.password);
 
     if (!correct) {
-        return next(new AppError('This email-password combination does not exist', 401));
+        return next(new appError('This email-password combination does not exist', 401));
     }
 
     user.password = req.body.newPassword;
@@ -147,7 +147,7 @@ exports.signup = catchAsync(async (req, res, next) => {
         passwordChangedAt: req.body.passwordChangedAt,
         role: req.body.role
     });
-    const url = `${req.protocol}://${req.get('host')}/me`
+    const url = `${req.protocol}://${req.get('host')}/me`;
     await new Email(newUser, url).sendWelcome();
     createSendToken(newUser, 201, res);
 
@@ -158,7 +158,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
     if (!email || !password) {
-        return next(new AppError('You have to provide an email and a password', 400));
+        return next(new appError('You have to provide an email and a password', 400));
     }
 
     const user = await User.findOne({ email: { $eq: email } }).select('+password');
@@ -170,7 +170,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 
     if (!user || !correct) {
-        return next(new AppError('This email-password combination is not found in our records', 401));
+        return next(new appError('This email-password combination is not found in our records', 401));
     }
 
     createSendToken(user, 200, res);
