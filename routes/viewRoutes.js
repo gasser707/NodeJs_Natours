@@ -5,7 +5,7 @@ const { isLoggedIn, protect } = require('../controllers/authController');
 const { createBookingCheckout } = require('../controllers/bookingController');
 const { router } = require('../app');
 
-viewRouter.route('/').get(createBookingCheckout, isLoggedIn, getOverview);
+viewRouter.route('/').get(isLoggedIn, getOverview);
 viewRouter.route('/tour/:slug').get(isLoggedIn, getTour);
 viewRouter.route('/login').get(isLoggedIn, login);
 viewRouter.route('/signup').get(isLoggedIn, signup);
