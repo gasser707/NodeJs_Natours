@@ -10,7 +10,7 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 
     const session = await stripe.checkout.sessions.create({
         payment_method_types: ['card'],
-        success_url: `${req.protocol}://${req.get('host')}/my-tours`,
+        success_url: `${req.protocol}://${req.get('host')}/my-tours?alert=booking`,
         cancel_url: `${req.protocol}://${req.get('host')}/tour/${tour.slug}`,
         customer_email: req.user.email,
         client_reference_id: req.params.tourId,
@@ -38,11 +38,11 @@ exports.getCheckoutSession = catchAsync(async (req, res, next) => {
 const createBookingCheckout = catchAsync(async (session) => {
     const tour = session.client_reference_id;
     const myUser = (await User.findOne({ email: session.customer_email })).id;
-    const price = session.line_items[0].amount / 100;
+    const price = session.display_items[0].amount / 100;
     await Booking.create({ tour, myUser, price });
 });
 
-exports.webhookCheckout = (req, res, next) => {
+exports.webhookCheckout = catchAsync(async(req, res, next) => {
     const signature = req.headers['stripe-signature'];
   
     let event;
@@ -52,20 +52,20 @@ exports.webhookCheckout = (req, res, next) => {
         signature,
         process.env.STRIPE_WEBHOOK_SECRET
       );
+
+      if (event.type === 'checkout.session.completed')
+      {
+          console.log(22)
+          await createBookingCheckout(event.data.object);
+          console.log(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET);
+          return res.status(200).json({ received: true });
+      }
     } catch (err) {
+        console.log(22)
+        console.log(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET);
       return res.status(400).send(`Webhook error: ${err.message}`);
     }
-  
-    if (event.type === 'checkout.session.completed')
-    {
-        console.log(22)
-        createBookingCheckout(event.data.object);
-        res.status(200).json({ received: true });
-    }
-    console.log(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET);
-
-  
-  };
+  });
 exports.createBooking = factory.createOne(Booking);
 exports.updateBooking = factory.updateOne(Booking);
 exports.getBooking = factory.getOne(Booking);
