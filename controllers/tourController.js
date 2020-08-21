@@ -1,7 +1,7 @@
 const catchAsync = require('../utils/catchAsync');
 const Tour = require('.//../models/tourModel');
 const factory = require('./handlerFactory');
-const AppError = require('../utils/appError');
+const AppError = require('../utils/appErrorsalma');
 const multer = require('multer');
 const sharp = require('sharp');
 

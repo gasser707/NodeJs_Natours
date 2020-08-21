@@ -1,7 +1,7 @@
 const Tour = require('../models/tourModel');
 const Booking = require('../models/bookingModel')
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
+const AppError = require('../utils/appErrorsalma');
 
 exports.getOverview = catchAsync(async (req, res, next) => {
     //1- get tour data from backend

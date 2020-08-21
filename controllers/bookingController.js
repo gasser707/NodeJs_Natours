@@ -2,7 +2,7 @@ const catchAsync = require('../utils/catchAsync');
 const Tour = require('../models/tourModel');
 const Booking = require('../models/bookingModel')
 const factory = require('./handlerFactory');
-const AppError = require('../utils/appError');
+const AppError = require('../utils/appErrorsalma');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 exports.getCheckoutSession = catchAsync(async (req, res, next) => {
