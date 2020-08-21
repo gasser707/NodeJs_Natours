@@ -39,13 +39,13 @@ const createBookingCheckout = catchAsync(async (session) => {
     try{
     console.log(11)
     const tour = session.client_reference_id;
-    const myUser = (await User.findOne({ email: session.customer_email })).id;
+    const user = (await User.findOne({ email: session.customer_email })).id;
     const price = session.display_items[0].amount / 100;
     console.log(myUser)
     console.log(tour)
     console.log(price)
     console.log(14)
-    await Booking.create({ tour, myUser, price });
+    await Booking.create({ tour, user, price });
     console.log(10)
     }catch(err){
         console.log('err here ',  err.message)
