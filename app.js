@@ -19,8 +19,6 @@ const compression = require('compression')
 
 //express.json is a middleware is function that modify the request data, if we remove it we don't get request in right form
 
-
-
 //Set security http headers
 app.use(helmet());
 app.use(
@@ -40,6 +38,7 @@ app.use(
 );
 
 //body parser - from body to req.body
+app.enable('trust proxy')
 app.use(express.json({ limit: '10kb' }));
 app.use(cookieParser());
 app.use(compression())

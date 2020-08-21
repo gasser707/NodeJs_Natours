@@ -37,3 +37,10 @@ process.on('uncaughtException', err => {
     process.exit(1); // 1 for uncalled exception
 
 });
+
+process.on('SIGTERM', ()=>{
+    console.log('SIGTERM RECIEVED SHUTTING DOWN GRACEFULLY! ')
+    server.close(()=>{
+        console.log('Process terminating')
+    })
+})
