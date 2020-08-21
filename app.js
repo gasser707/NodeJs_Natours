@@ -15,6 +15,7 @@ const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
+const {webhookCheckout} = require('./controllers/bookingController')
 const compression = require('compression');
 const cors = require('cors');
 
@@ -37,6 +38,9 @@ app.use(
     },
   })
 );
+
+//we need the req to not be json it had to be raw format
+app.post('/webhook-checkout', express.raw({type:'application/json'}),webhookCheckout)
 
 //body parser - from body to req.body
 app.enable('trust proxy');
@@ -84,6 +88,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 //this setup below is called making sub applications, we have different routers for different routes
+
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
