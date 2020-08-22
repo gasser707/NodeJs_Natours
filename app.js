@@ -16,6 +16,7 @@ const reviewRouter = require('./routes/reviewRoutes');
 const viewRouter = require('./routes/viewRoutes');
 const bookingRouter = require('./routes/bookingRoutes');
 const {webhookCheckout} = require('./controllers/bookingController')
+const {alerts} = require('./controllers/viewsController')
 const compression = require('compression');
 const cors = require('cors');
 
@@ -51,6 +52,7 @@ app.options('*', cors());
 //serving static files
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.use(alerts)
 //we need the req to not be json it had to be raw format
 app.post('/webhook-checkout', express.raw({type:'application/json'}),webhookCheckout)
 
